@@ -6,22 +6,27 @@ var total = 0
 var index = 0
 
 const calculate = (file)=>{
-    const array = fileToArray ( path.resolve ( file ) )
-    //Start here
-    traverse ( array , file )
-    //save total to first file info
-    let firstItem = Object.keys(keys)[0]
-    keys[firstItem] = total
+    try {
+        const array = fileToArray ( path.resolve ( file ) )
+        //Start here
+        traverse ( array , file )
+        //save total to first file info
+        let firstItem = Object.keys(keys)[0]
+        keys[firstItem] = total
 
-    //create array of subtotals
-    let arr = Object.values ( keys )
-    //remove first items since we have the general total
-    arr.splice(0,1)
+        //create array of subtotals
+        let arr = Object.values ( keys )
+        //remove first items since we have the general total
+        arr.splice(0,1)
 
-    //sum thru the array
-    arraySum(arr)
+        //sum thru the array
+        arraySum(arr)
+    
+        return keys
    
-    return keys
+    } catch ( err ){
+        console.log ( file , ' not found!')
+    }
 }
 
 /* Functions --------------------------------------------------------------------- */
@@ -31,7 +36,11 @@ const calculate = (file)=>{
 // Since a number can be integer as decimal is converted to float
 // @file = file path
 function fileToArray(file){
-    return fs.readFileSync(file,'utf8').split("\r\n").map( a=> { return  parseFloat(a) ? parseFloat(a) : a } );
+    try {
+        return fs.readFileSync(file,'utf8').split("\r\n").map( a=> { return  parseFloat(a) ? parseFloat(a) : a } );
+    } catch ( err ){
+        return err
+    }
 }
 
 // traverse()
@@ -51,8 +60,13 @@ function traverse ( array , fileName ){
     })
     keys [ fileName ] = fileTotal
     if ( nextFile ) {
-        let arr = fileToArray ( path.resolve ( nextFile ) )
-        traverse ( arr , nextFile )
+        try {
+            let arr = fileToArray ( path.resolve ( nextFile ) )
+            traverse ( arr , nextFile )
+        } catch (err) {
+            console.log ( nextFile , ' not found or not readable!')
+            return err
+        }
     }
 }
 
